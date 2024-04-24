@@ -12,7 +12,7 @@ class CustomGoogleMap extends StatefulWidget {
 
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition initialCameraPosition;
-  late GoogleMapController googleMapController;
+  GoogleMapController? googleMapController;
 
   Set<Marker> myMarkers = {};
   Set<Polyline> myPolyLines = {};
@@ -24,12 +24,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     super.initState();
     initialCameraPosition = const CameraPosition(
       target: LatLng(31.20632194391642, 29.911010868194964),
-      zoom: 15,
+      zoom: 14,
     );
-    // addMarkers();
+    addMarkers();
     // addPolyLines();
     location = Location();
-    checkAndRequestLocationServiceAndPermission();
+    updateMyLocation(context);
   }
 
   ///First Step .
@@ -44,31 +44,89 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   // if user not accepted again -> Not Granted (denied or denied forever )
   //Show error
 
-  Future<void> checkAndRequestLocationService() async {
+  Future<bool> checkAndRequestLocationService() async {
     bool isEnabled = await location.serviceEnabled();
     if (!isEnabled) {
       isEnabled = await location.requestService();
       if (!isEnabled) {
         //ToDO: Show Error Bar (Error , OR Don't Have Access ) ;
+        return false;
       }
+      return true;
     }
+    return true;
   }
 
-  Future<void> checkAndRequestLocationPermission() async {
+  Future<bool> checkAndRequestLocationPermission() async {
     PermissionStatus permissionStatus = await location.hasPermission();
+
+    if (permissionStatus == PermissionStatus.deniedForever) {
+      return false;
+    }
     if (permissionStatus == PermissionStatus.denied) {
       permissionStatus = await location.requestPermission();
+
+      if (permissionStatus != PermissionStatus.granted) {
+        ///ToDO: Show Error Bar (Error , OR Don't Have Access ) ;
+        return false;
+      } else {
+        return true;
+      }
     }
-    if (permissionStatus != PermissionStatus.granted) {
-      ///ToDO: Show Error Bar (Error , OR Don't Have Access ) ;
+    return true;
+  }
+
+  void getLocationData() {
+    //Request a new location every 2 meter
+    // store previous location and compare with current Location
+    //update if current>2m of Previous Location
+
+    location.changeSettings(
+      distanceFilter: 50,
+    );
+    location.onLocationChanged.listen((locationData) {
+      var myLocationMarker = Marker(
+          markerId: const MarkerId('locationMarker'),
+          position: LatLng(
+            locationData.latitude!,
+            locationData.longitude!,
+          ));
+
+      setState(() {
+        myMarkers.add(myLocationMarker);
+      });
+      googleMapController?.animateCamera(
+        CameraUpdate.newCameraPosition(
+          CameraPosition(
+            target: LatLng(
+              locationData.latitude!,
+              locationData.longitude!,
+            ),
+            zoom: 14,
+          ),
+        ),
+      );
+    });
+  }
+
+  Future<void> updateMyLocation(context) async {
+    bool isServiceEnabled = await checkAndRequestLocationService();
+    if (isServiceEnabled) {
+      bool hasPermission = await checkAndRequestLocationPermission();
+      if (hasPermission) {
+        getLocationData();
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('You Don\'t have Permission '),
+        ));
+      }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('Check Service Location '),
+      ));
     }
   }
 
-  void checkAndRequestLocationServiceAndPermission()async
-  {
-    await checkAndRequestLocationService();
-    await checkAndRequestLocationPermission();
-  }
   addMarkers() async {
     BitmapDescriptor image = await BitmapDescriptor.fromAssetImage(
       const ImageConfiguration(),
@@ -81,7 +139,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
             (place) => Marker(
               markerId: MarkerId(place.id.toString()),
               position: place.latLng,
-              icon: image,
+              // icon: image,
               infoWindow: InfoWindow(
                 title: place.name,
               ),
@@ -116,7 +174,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     String mapStyle = await DefaultAssetBundle.of(context)
         .loadString('assets/map_styles/dark_map_style.json');
 
-    await googleMapController.setMapStyle(mapStyle);
+    await googleMapController!.setMapStyle(mapStyle);
   }
 
   @override
@@ -125,7 +183,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       body: GoogleMap(
         // mapType: MapType.satellite   ,
         initialCameraPosition: initialCameraPosition,
-        polylines: myPolyLines,
+        // polylines: myPolyLines,
         onMapCreated: (controller) {
           googleMapController = controller;
           loadMapStyle();
