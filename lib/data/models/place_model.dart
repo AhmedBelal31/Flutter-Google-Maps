@@ -32,6 +32,11 @@ List<PlaceModel> placeModels =const [
     name: 'مطعم البركه',
     latLng: LatLng(31.21468723171336, 29.92215749941917),
   ),
+  PlaceModel(
+    id: 4,
+    name: 'بركه السبع',
+    latLng: LatLng( 30.647683067593913, 31.09135744578681),
+  ),
 
 
 
