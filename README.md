@@ -2,7 +2,7 @@
 
 A new Flutter project.
 
-## Summary!"
+## Project Summary!"
 
 - **Google Maps Basics**: Developed a Flutter app to learn Google Maps basics using the Google Maps API.
 - **Location Services**: Implemented location services to fetch the user's current location and allow them to search for specific locations.
