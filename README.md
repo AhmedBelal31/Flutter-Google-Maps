@@ -1,16 +1,11 @@
-# flutter_with_google_maps
+# Flutter With Google Maps
 
 A new Flutter project.
 
-## Getting Started
+## Project Summary!"
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- **Google Maps Basics**: Developed a Flutter app to learn Google Maps basics using the Google Maps API.
+- **Location Services**: Implemented location services to fetch the user's current location and allow them to search for specific locations.
+- **Markers**: Utilized markers to indicate specific points of interest on the map, with customizable properties such as icons.
+- **Polylines and Polygons**: Incorporated polylines and polygons to visualize routes and areas of interest on the map.
+- **Custom Map Styling**: Applied custom map styles to enhance the visual appearance of the map and provide a unique user experience.
