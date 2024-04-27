@@ -42,14 +42,20 @@ class LocationService {
   }
 
 
-  void getRealTimeLocationData(void Function(LocationData)? onData) {
-    ///Request a new location every 2 meter
-    /// store previous location and compare with current Location
-    ///update if current>2m of Previous Location
+  // void getRealTimeLocationData(void Function(LocationData)? onData) {
+  //   ///Request a new location every 2 meter
+  //   /// store previous location and compare with current Location
+  //   ///update if current>2m of Previous Location
+  //
+  //   // location.changeSettings(
+  //   //   distanceFilter: 5,
+  //   // );
+  //   location.onLocationChanged.listen(onData);
+  // }
 
-    // location.changeSettings(
-    //   distanceFilter: 5,
-    // );
-    location.onLocationChanged.listen(onData);
-  }
+Future<LocationData> getData() async
+{
+  return await location.getLocation();
+}
+
 }
