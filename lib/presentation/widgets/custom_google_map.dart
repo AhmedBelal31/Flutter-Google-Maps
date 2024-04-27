@@ -3,7 +3,6 @@ import 'package:flutter_with_google_maps/core/services/location_service.dart';
 import 'package:flutter_with_google_maps/data/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
-
 import '../../core/utils/custom_snak_bar.dart';
 import '../../core/utils/new_marker.dart';
 
@@ -18,10 +17,8 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition initialCameraPosition;
   late LocationService locationService;
   GoogleMapController? googleMapController;
-  bool isFirstCall = true;
-
-  Set<Marker> myMarkers = {};
-
+  // bool isFirstCall = true;
+  // Set<Marker> myMarkers = {};
   // Set<Polyline> myPolyLines = {};
 
   @override
@@ -34,61 +31,61 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     addMarkers();
     // addPolyLines();
     locationService = LocationService();
-    updateMyLocation(context);
+
   }
 
-  Future<void> updateMyLocation(context) async {
-    bool isServiceEnabled =
-        await locationService.checkAndRequestLocationService();
-    if (!isServiceEnabled) {
-      showErrorSnackBar(context, text: 'Check Service Location');
-    }
-    var hasPermission =
-        await locationService.checkAndRequestLocationPermission();
-    if (hasPermission) {
-      locationService.getRealTimeLocationData((locationData) {
-        setMyLocationMarker(locationData);
-        changeMyNewCameraPosition(locationData);
-      });
-    } else {
-      showErrorSnackBar(context,
-          text: 'You Don\'t Real-Time Location Permission ');
-    }
-  }
-
-  void changeMyNewCameraPosition(LocationData locationData) {
-    if (isFirstCall) {
-      CameraPosition cameraPosition = CameraPosition(
-        target: LatLng(
-          locationData.latitude!,
-          locationData.longitude!,
-        ),
-        zoom: 17,
-      );
-      googleMapController
-          ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
-      isFirstCall = false;
-    } else {
-      googleMapController?.animateCamera(
-        CameraUpdate.newLatLng(
-          LatLng(
-            locationData.latitude!,
-            locationData.longitude!,
-          ),
-        ),
-      );
-    }
-  }
-
-  void setMyLocationMarker(LocationData locationData) {
-    var myLocationMarker = newMarker(
-      id: 'locationMarker',
-      latLng: LatLng(locationData.latitude!, locationData.longitude!),
-    );
-    setState(() {
-      myMarkers.add(myLocationMarker);
-    });
-  }
+  // Future<void> updateMyLocation(context) async {
+  //   bool isServiceEnabled =
+  //       await locationService.checkAndRequestLocationService();
+  //   if (!isServiceEnabled) {
+  //     showErrorSnackBar(context, text: 'Check Service Location');
+  //   }
+  //   var hasPermission =
+  //       await locationService.checkAndRequestLocationPermission();
+  //   if (hasPermission) {
+  //     locationService.getRealTimeLocationData((locationData) {
+  //       setMyLocationMarker(locationData);
+  //       changeMyNewCameraPosition(locationData);
+  //     });
+  //   } else {
+  //     showErrorSnackBar(context,
+  //         text: 'You Don\'t Real-Time Location Permission ');
+  //   }
+  // }
+  //
+  // void changeMyNewCameraPosition(LocationData locationData) {
+  //   if (isFirstCall) {
+  //     CameraPosition cameraPosition = CameraPosition(
+  //       target: LatLng(
+  //         locationData.latitude!,
+  //         locationData.longitude!,
+  //       ),
+  //       zoom: 17,
+  //     );
+  //     googleMapController
+  //         ?.animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+  //     isFirstCall = false;
+  //   } else {
+  //     googleMapController?.animateCamera(
+  //       CameraUpdate.newLatLng(
+  //         LatLng(
+  //           locationData.latitude!,
+  //           locationData.longitude!,
+  //         ),
+  //       ),
+  //     );
+  //   }
+  // }
+  //
+  // void setMyLocationMarker(LocationData locationData) {
+  //   var myLocationMarker = newMarker(
+  //     id: 'locationMarker',
+  //     latLng: LatLng(locationData.latitude!, locationData.longitude!),
+  //   );
+  //   setState(() {
+  //     myMarkers.add(myLocationMarker);
+  //   });
+  // }
 
   addMarkers() async {
     BitmapDescriptor image = await BitmapDescriptor.fromAssetImage(
