@@ -28,7 +28,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       target: LatLng(31.20632194391642, 29.911010868194964),
       zoom: 1,
     );
-    addMarkers();
+    // addMarkers();
     // addPolyLines();
     locationService = LocationService();
 
@@ -87,28 +87,28 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   //   });
   // }
 
-  addMarkers() async {
-    BitmapDescriptor image = await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(),
-      'assets/images/icons8-marker-50.png',
-    );
-
-    myMarkers.addAll(
-      placeModels
-          .map(
-            (place) => Marker(
-              markerId: MarkerId(place.id.toString()),
-              position: place.latLng,
-              // icon: image,
-              infoWindow: InfoWindow(
-                title: place.name,
-              ),
-            ),
-          )
-          .toSet(),
-    );
-    setState(() {});
-  }
+  // addMarkers() async {
+  //   BitmapDescriptor image = await BitmapDescriptor.fromAssetImage(
+  //     const ImageConfiguration(),
+  //     'assets/images/icons8-marker-50.png',
+  //   );
+  //
+  //   myMarkers.addAll(
+  //     placeModels
+  //         .map(
+  //           (place) => Marker(
+  //             markerId: MarkerId(place.id.toString()),
+  //             position: place.latLng,
+  //             // icon: image,
+  //             infoWindow: InfoWindow(
+  //               title: place.name,
+  //             ),
+  //           ),
+  //         )
+  //         .toSet(),
+  //   );
+  //   setState(() {});
+  // }
 
   // addPolyLines() {
   //   myPolyLines.add(
@@ -147,7 +147,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
           googleMapController = controller;
           loadMapStyle();
         },
-        markers: myMarkers,
+        // markers: myMarkers,
       ),
     );
   }
