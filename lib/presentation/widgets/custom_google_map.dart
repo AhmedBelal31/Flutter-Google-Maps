@@ -3,6 +3,7 @@ import 'package:flutter_with_google_maps/core/services/location_service.dart';
 import 'package:flutter_with_google_maps/data/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
+
 import '../../core/utils/custom_snak_bar.dart';
 import '../../core/utils/new_marker.dart';
 
@@ -16,9 +17,11 @@ class CustomGoogleMap extends StatefulWidget {
 class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition initialCameraPosition;
   late LocationService locationService;
-  GoogleMapController? googleMapController;
+  late GoogleMapController googleMapController;
+
   // bool isFirstCall = true;
-  // Set<Marker> myMarkers = {};
+  var myMarkers = <Marker>{};
+
   // Set<Polyline> myPolyLines = {};
 
   @override
@@ -28,10 +31,9 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       target: LatLng(31.20632194391642, 29.911010868194964),
       zoom: 1,
     );
-    // addMarkers();
+    //addMarkers();
     // addPolyLines();
     locationService = LocationService();
-
   }
 
   // Future<void> updateMyLocation(context) async {
@@ -146,9 +148,33 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         onMapCreated: (controller) {
           googleMapController = controller;
           loadMapStyle();
+          updateCurrentLocation();
         },
-        // markers: myMarkers,
+        markers: myMarkers,
       ),
     );
+  }
+
+  void updateCurrentLocation() async {
+    try {
+      var locationData = await locationService.getLocation();
+      var myCameraPosition = CameraPosition(
+        zoom: 16,
+        target: LatLng(locationData.latitude!, locationData.longitude!),
+      );
+      var myMarker = newMarker(
+        id: 'myMarker2',
+        latLng: LatLng(locationData.latitude!, locationData.longitude!),
+      );
+      myMarkers.add(myMarker);
+      setState(() {});
+      googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(myCameraPosition),
+      );
+    } on LocationServiceException catch (e) {
+      // TODO
+    } on LocationPermissionException catch (e) {
+      // TODO
+    } catch (e) {}
   }
 }

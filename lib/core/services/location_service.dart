@@ -56,7 +56,9 @@ class LocationService {
     location.onLocationChanged.listen(onData);
   }
 
-  Future<LocationData> getData() async {
+  Future<LocationData> getLocation() async {
+    await checkAndRequestLocationService();
+    await checkAndRequestLocationPermission();
     return await location.getLocation();
   }
 }
