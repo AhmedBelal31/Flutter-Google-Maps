@@ -6,6 +6,7 @@ import 'package:location/location.dart';
 
 import '../../core/utils/custom_snak_bar.dart';
 import '../../core/utils/new_marker.dart';
+import 'custom_text_field.dart';
 
 class CustomGoogleMap extends StatefulWidget {
   const CustomGoogleMap({super.key});
@@ -141,16 +142,29 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: GoogleMap(
-        initialCameraPosition: initialCameraPosition,
-        // polylines: myPolyLines,
-        onMapCreated: (controller) {
-          googleMapController = controller;
-          loadMapStyle();
-          updateCurrentLocation();
-        },
-        markers: myMarkers,
+    return SafeArea(
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Stack(
+          children: [
+            GoogleMap(
+              initialCameraPosition: initialCameraPosition,
+              // polylines: myPolyLines,
+              onMapCreated: (controller) {
+                googleMapController = controller;
+                loadMapStyle();
+                updateCurrentLocation();
+              },
+              markers: myMarkers,
+            ),
+            const Positioned(
+              top: 16,
+              right: 16,
+              left: 16,
+              child: CustomTextField(),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -178,3 +192,5 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     } catch (e) {}
   }
 }
+
+
