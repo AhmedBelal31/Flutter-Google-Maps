@@ -17,7 +17,10 @@ class GoogleMapsPlacesServices {
       // for (var placeItem in data) {
       //   places.add(PredictionsModel.fromJson(placeItem));
       // }
-      return data.map((placeItem) => PredictionsModel.fromJson(placeItem));
+      // return places ;
+      List<PredictionsModel> places = List<PredictionsModel>.from(
+          data.map((placeItem) => PredictionsModel.fromJson(placeItem)));
+      return places;
     } else {
       throw Exception();
     }

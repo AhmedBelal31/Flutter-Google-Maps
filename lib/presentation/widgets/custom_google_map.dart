@@ -4,6 +4,7 @@ import 'package:flutter_with_google_maps/data/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:location/location.dart';
 
+import '../../core/services/google_maps_places_services.dart';
 import '../../core/utils/custom_snak_bar.dart';
 import '../../core/utils/new_marker.dart';
 import 'custom_text_field.dart';
@@ -19,6 +20,8 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late CameraPosition initialCameraPosition;
   late LocationService locationService;
   late GoogleMapController googleMapController;
+  late TextEditingController textEditingController;
+  late GoogleMapsPlacesServices googleMapsPlacesServices;
 
   // bool isFirstCall = true;
   var myMarkers = <Marker>{};
@@ -27,7 +30,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
 
   @override
   void initState() {
-    super.initState();
     initialCameraPosition = const CameraPosition(
       target: LatLng(31.20632194391642, 29.911010868194964),
       zoom: 1,
@@ -35,6 +37,35 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     //addMarkers();
     // addPolyLines();
     locationService = LocationService();
+    textEditingController = TextEditingController();
+    googleMapsPlacesServices = GoogleMapsPlacesServices();
+    textEditingController.addListener(() => fetchPredications());
+
+    super.initState();
+  }
+
+  void fetchPredications() async {
+    if (textEditingController.text.isNotEmpty) {
+      var result = await googleMapsPlacesServices.getPredications(
+          input: textEditingController.text);
+    }
+  }
+
+  // void fetchPredications() {
+  //   textEditingController.addListener(() async {
+  //     if (textEditingController.text.isNotEmpty) {
+  //       var result = await googleMapsPlacesServices.getPredications(
+  //           input: textEditingController.text);
+  //       print(result);
+  //     }
+  //
+  //   });
+  // }
+
+  @override
+  void dispose() {
+    textEditingController.dispose();
+    super.dispose();
   }
 
   // Future<void> updateMyLocation(context) async {
@@ -157,11 +188,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
               },
               markers: myMarkers,
             ),
-            const Positioned(
+            Positioned(
               top: 16,
               right: 16,
               left: 16,
-              child: CustomTextField(),
+              child:
+                  CustomTextField(textEditingController: textEditingController),
             ),
           ],
         ),
@@ -177,7 +209,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         target: LatLng(locationData.latitude!, locationData.longitude!),
       );
       var myMarker = newMarker(
-        id: 'myMarker2',
+        id: 'myMarker21',
         latLng: LatLng(locationData.latitude!, locationData.longitude!),
       );
       myMarkers.add(myMarker);
@@ -186,11 +218,11 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
         CameraUpdate.newCameraPosition(myCameraPosition),
       );
     } on LocationServiceException catch (e) {
+      print('LocationServiceException');
       // TODO
     } on LocationPermissionException catch (e) {
       // TODO
+      print('LocationPermissionException');
     } catch (e) {}
   }
 }
-
-
