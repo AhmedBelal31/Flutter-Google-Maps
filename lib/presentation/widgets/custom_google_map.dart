@@ -7,6 +7,7 @@ import 'package:location/location.dart';
 import '../../core/services/google_maps_places_services.dart';
 import '../../core/utils/custom_snak_bar.dart';
 import '../../core/utils/new_marker.dart';
+import '../../data/models/place_autocomplete_model.dart';
 import 'custom_text_field.dart';
 
 class CustomGoogleMap extends StatefulWidget {
@@ -22,6 +23,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late GoogleMapController googleMapController;
   late TextEditingController textEditingController;
   late GoogleMapsPlacesServices googleMapsPlacesServices;
+  List<PredictionsModel> places = [];
 
   // bool isFirstCall = true;
   var myMarkers = <Marker>{};
@@ -47,7 +49,14 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   void fetchPredications() async {
     if (textEditingController.text.isNotEmpty) {
       var result = await googleMapsPlacesServices.getPredications(
-          input: textEditingController.text);
+        input: textEditingController.text,
+      );
+      places.clear();
+      places.addAll(result);
+      setState(() {});
+    } else {
+      places.clear();
+      setState(() {});
     }
   }
 
@@ -121,28 +130,28 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   //   });
   // }
 
-  // addMarkers() async {
-  //   BitmapDescriptor image = await BitmapDescriptor.fromAssetImage(
-  //     const ImageConfiguration(),
-  //     'assets/images/icons8-marker-50.png',
-  //   );
-  //
-  //   myMarkers.addAll(
-  //     placeModels
-  //         .map(
-  //           (place) => Marker(
-  //             markerId: MarkerId(place.id.toString()),
-  //             position: place.latLng,
-  //             // icon: image,
-  //             infoWindow: InfoWindow(
-  //               title: place.name,
-  //             ),
-  //           ),
-  //         )
-  //         .toSet(),
-  //   );
-  //   setState(() {});
-  // }
+  addMarkers() async {
+    BitmapDescriptor image = await BitmapDescriptor.fromAssetImage(
+      const ImageConfiguration(),
+      'assets/images/icons8-marker-50.png',
+    );
+
+    myMarkers.addAll(
+      placeModels
+          .map(
+            (place) => Marker(
+              markerId: MarkerId(place.id.toString()),
+              position: place.latLng,
+              // icon: image,
+              infoWindow: InfoWindow(
+                title: place.name,
+              ),
+            ),
+          )
+          .toSet(),
+    );
+    setState(() {});
+  }
 
   // addPolyLines() {
   //   myPolyLines.add(
@@ -192,8 +201,15 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
               top: 16,
               right: 16,
               left: 16,
-              child:
+              child: Column(
+                children: [
                   CustomTextField(textEditingController: textEditingController),
+                  const SizedBox(height: 20),
+                  PlacesListView(
+                    places: places,
+                  )
+                ],
+              ),
             ),
           ],
         ),
@@ -224,5 +240,37 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       // TODO
       print('LocationPermissionException');
     } catch (e) {}
+  }
+}
+
+class PlacesListView extends StatelessWidget {
+  final List<PredictionsModel> places;
+
+  const PlacesListView({super.key, required this.places});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const BouncingScrollPhysics(),
+      itemBuilder: (context, index) {
+        return Container(
+          decoration: BoxDecoration(
+              color: Colors.white.withOpacity(.5),
+              borderRadius: BorderRadius.circular(12.0)),
+          child: ListTile(
+            title: Text(places[index].description!),
+            leading: const Icon(
+              Icons.location_on_outlined,
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios),
+          ),
+        );
+      },
+      separatorBuilder: (context, index) => const SizedBox(
+        height: 8,
+      ),
+      itemCount: places.length,
+    );
   }
 }
