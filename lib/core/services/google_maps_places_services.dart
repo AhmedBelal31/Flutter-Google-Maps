@@ -6,11 +6,11 @@ import '../utils/api_key.dart';
 
 class GoogleMapsPlacesServices {
   Future<List<PredictionsModel>> getPredications(
-      {required String input}) async {
+      {required String input, required sessionToken}) async {
     String baseUrl = 'https://maps.googleapis.com/maps/api/place';
 
     var response = await http
-        .get(Uri.parse('$baseUrl/autocomplete/json?input=$input&key=$apiKey'));
+        .get(Uri.parse('$baseUrl/autocomplete/json?input=$input&sessiontoken=$sessionToken&key=$apiKey'));
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body)['predictions'];
@@ -27,15 +27,14 @@ class GoogleMapsPlacesServices {
     }
   }
 
-  Future<PlaceDetailsModel> getPlaceDetails({required String placeId}) async {
+  Future<PlaceDetailsModel> getPlaceDetails({required String placeId }) async {
     String baseUrl = 'https://maps.googleapis.com/maps/api/place';
 
     var response = await http
         .get(Uri.parse('$baseUrl/details/json?place_id=$placeId&key=$apiKey'));
 
     if (response.statusCode == 200) {
-      var data = jsonDecode(response.body);
-
+      var data = jsonDecode(response.body)['result'];
       PlaceDetailsModel placeDetails = PlaceDetailsModel.fromJson(data);
       return placeDetails;
     } else {

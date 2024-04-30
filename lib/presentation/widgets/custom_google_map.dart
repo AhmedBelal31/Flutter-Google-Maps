@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_with_google_maps/core/services/location_service.dart';
 import 'package:flutter_with_google_maps/data/models/place_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:location/location.dart';
-
+import 'package:uuid/uuid.dart';
 import '../../core/services/google_maps_places_services.dart';
-import '../../core/utils/custom_snak_bar.dart';
 import '../../core/utils/new_marker.dart';
 import '../../data/models/place_autocomplete_model.dart';
 import 'custom_text_field.dart';
+import 'places_list_view.dart';
 
 class CustomGoogleMap extends StatefulWidget {
   const CustomGoogleMap({super.key});
@@ -24,6 +23,8 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late TextEditingController textEditingController;
   late GoogleMapsPlacesServices googleMapsPlacesServices;
   List<PredictionsModel> places = [];
+  late Uuid  uuid;
+  String? sessionToken ;
 
   // bool isFirstCall = true;
   var myMarkers = <Marker>{};
@@ -38,6 +39,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     );
     //addMarkers();
     // addPolyLines();
+    uuid = Uuid();
     locationService = LocationService();
     textEditingController = TextEditingController();
     googleMapsPlacesServices = GoogleMapsPlacesServices();
@@ -47,9 +49,12 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   }
 
   void fetchPredications() async {
+     sessionToken??= uuid.v4();
     if (textEditingController.text.isNotEmpty) {
+   print(sessionToken);
       var result = await googleMapsPlacesServices.getPredications(
         input: textEditingController.text,
+        sessionToken: sessionToken!
       );
       places.clear();
       places.addAll(result);
@@ -192,7 +197,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
               // polylines: myPolyLines,
               onMapCreated: (controller) {
                 googleMapController = controller;
-                loadMapStyle();
+                // loadMapStyle();
                 updateCurrentLocation();
               },
               markers: myMarkers,
@@ -207,6 +212,16 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
                   const SizedBox(height: 20),
                   PlacesListView(
                     places: places,
+                    googleMapsPlacesServices:googleMapsPlacesServices,
+                    onPlaceSelected:(placeDetailsModel)
+                    {
+                      sessionToken=null ;
+                      print(placeDetailsModel.adrAddress);
+                      textEditingController.clear();
+                      places.clear();
+                      setState(() {});
+
+                    },
                   )
                 ],
               ),
@@ -243,34 +258,4 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   }
 }
 
-class PlacesListView extends StatelessWidget {
-  final List<PredictionsModel> places;
 
-  const PlacesListView({super.key, required this.places});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView.separated(
-      shrinkWrap: true,
-      physics: const BouncingScrollPhysics(),
-      itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-              color: Colors.white.withOpacity(.5),
-              borderRadius: BorderRadius.circular(12.0)),
-          child: ListTile(
-            title: Text(places[index].description!),
-            leading: const Icon(
-              Icons.location_on_outlined,
-            ),
-            trailing: const Icon(Icons.arrow_forward_ios),
-          ),
-        );
-      },
-      separatorBuilder: (context, index) => const SizedBox(
-        height: 8,
-      ),
-      itemCount: places.length,
-    );
-  }
-}
