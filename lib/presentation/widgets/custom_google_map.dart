@@ -28,7 +28,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   // bool isFirstCall = true;
   var myMarkers = <Marker>{};
 
-  // Set<Polyline> myPolyLines = {};
+ Set<Polyline> myPolyLines = {};
 
   @override
   void initState() {
@@ -153,25 +153,25 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     setState(() {});
   }
 
-  // addPolyLines() {
-  //   myPolyLines.add(
-  //     const Polyline(
-  //       polylineId: PolylineId('1'),
-  //       width: 2,
-  //       endCap: Cap.roundCap,
-  //       // geodesic: true,
-  //       startCap: Cap.squareCap,
-  //       // jointType: JointType.mitered,
-  //       color: Colors.red,
-  //       points: [
-  //         LatLng(31.197765986988546, 29.899822747599988),
-  //         LatLng(31.201296109318136, 29.91396385665663),
-  //         LatLng(31.209290311153776, 29.920154385084857),
-  //         LatLng(31.21505194669606, 29.924099329671478),
-  //       ],
-  //     ),
-  //   );
-  // }
+  addPolyLines() {
+    myPolyLines.add(
+      const Polyline(
+        polylineId: PolylineId('1'),
+        width: 2,
+        endCap: Cap.roundCap,
+        // geodesic: true,
+        startCap: Cap.squareCap,
+        // jointType: JointType.mitered,
+        color: Colors.red,
+        points: [
+          LatLng(31.197765986988546, 29.899822747599988),
+          LatLng(31.201296109318136, 29.91396385665663),
+          LatLng(31.209290311153776, 29.920154385084857),
+          LatLng(31.21505194669606, 29.924099329671478),
+        ],
+      ),
+    );
+  }
 
   void loadMapStyle() async {
     String mapStyle = await DefaultAssetBundle.of(context)
