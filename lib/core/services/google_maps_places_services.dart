@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_with_google_maps/data/models/place_autocomplete_model.dart';
+import 'package:flutter_with_google_maps/data/models/place_details_model/place_details_model.dart';
 import 'package:http/http.dart' as http;
 import '../utils/api_key.dart';
 
@@ -21,6 +22,22 @@ class GoogleMapsPlacesServices {
       List<PredictionsModel> places = List<PredictionsModel>.from(
           data.map((placeItem) => PredictionsModel.fromJson(placeItem)));
       return places;
+    } else {
+      throw Exception();
+    }
+  }
+
+  Future<PlaceDetailsModel> getPlaceDetails({required String placeId}) async {
+    String baseUrl = 'https://maps.googleapis.com/maps/api/place';
+
+    var response = await http
+        .get(Uri.parse('$baseUrl/details/json?place_id=$placeId&key=$apiKey'));
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+
+      PlaceDetailsModel placeDetails = PlaceDetailsModel.fromJson(data);
+      return placeDetails;
     } else {
       throw Exception();
     }
