@@ -1,11 +1,19 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_with_google_maps/core/services/location_service.dart';
+import 'package:flutter_with_google_maps/core/services/routes_services.dart';
+import 'package:flutter_with_google_maps/data/models/location_info/lat_lng.dart';
+import 'package:flutter_with_google_maps/data/models/location_info/location.dart';
+import 'package:flutter_with_google_maps/data/models/location_info/location_info.dart';
 import 'package:flutter_with_google_maps/data/models/place_model.dart';
+import 'package:flutter_with_google_maps/data/models/routes_model/routes_model.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/services/google_maps_places_services.dart';
 import '../../core/utils/new_marker.dart';
 import '../../data/models/place_autocomplete_model.dart';
+import '../../data/models/routes_model/route.dart';
 import 'custom_text_field.dart';
 import 'places_list_view.dart';
 
@@ -23,13 +31,19 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late TextEditingController textEditingController;
   late GoogleMapsPlacesServices googleMapsPlacesServices;
   List<PredictionsModel> places = [];
-  late Uuid  uuid;
-  String? sessionToken ;
+  late Uuid uuid;
+  String? sessionToken;
+
+  late RoutesService routesService;
+
+  late LatLng currentLocation;
+
+  late LatLng destinationLocation;
 
   // bool isFirstCall = true;
   var myMarkers = <Marker>{};
 
- Set<Polyline> myPolyLines = {};
+  Set<Polyline> myPolyLines = {};
 
   @override
   void initState() {
@@ -44,18 +58,16 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     textEditingController = TextEditingController();
     googleMapsPlacesServices = GoogleMapsPlacesServices();
     textEditingController.addListener(() => fetchPredications());
-
+    routesService = RoutesService();
     super.initState();
   }
 
   void fetchPredications() async {
-     sessionToken??= uuid.v4();
+    sessionToken ??= uuid.v4();
     if (textEditingController.text.isNotEmpty) {
-   print(sessionToken);
       var result = await googleMapsPlacesServices.getPredications(
-        input: textEditingController.text,
-        sessionToken: sessionToken!
-      );
+          input: textEditingController.text, sessionToken: sessionToken!);
+
       places.clear();
       places.addAll(result);
       setState(() {});
@@ -64,17 +76,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       setState(() {});
     }
   }
-
-  // void fetchPredications() {
-  //   textEditingController.addListener(() async {
-  //     if (textEditingController.text.isNotEmpty) {
-  //       var result = await googleMapsPlacesServices.getPredications(
-  //           input: textEditingController.text);
-  //       print(result);
-  //     }
-  //
-  //   });
-  // }
 
   @override
   void dispose() {
@@ -185,6 +186,30 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     await googleMapController!.setMapStyle(mapStyle);
   }
 
+  void updateCurrentLocation() async {
+    try {
+      var locationData = await locationService.getLocation();
+      currentLocation = LatLng(locationData.latitude!, locationData.longitude!);
+      var myCameraPosition = CameraPosition(
+        zoom: 16,
+        target: currentLocation,
+      );
+      var myMarker = newMarker(
+        id: 'myMarker21',
+        latLng: LatLng(locationData.latitude!, locationData.longitude!),
+      );
+      myMarkers.add(myMarker);
+      setState(() {});
+      googleMapController.animateCamera(
+        CameraUpdate.newCameraPosition(myCameraPosition),
+      );
+    } on LocationServiceException catch (e) {
+      // TODO
+    } on LocationPermissionException catch (e) {
+      // TODO
+    } catch (e) {}
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -212,15 +237,17 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
                   const SizedBox(height: 20),
                   PlacesListView(
                     places: places,
-                    googleMapsPlacesServices:googleMapsPlacesServices,
-                    onPlaceSelected:(placeDetailsModel)
-                    {
-                      sessionToken=null ;
-                      print(placeDetailsModel.adrAddress);
+                    googleMapsPlacesServices: googleMapsPlacesServices,
+                    onPlaceSelected: (placeDetailsModel) {
+                      // sessionToken=null ;
+                      // print(placeDetailsModel.adrAddress);
                       textEditingController.clear();
                       places.clear();
+                      destinationLocation = LatLng(
+                          placeDetailsModel.geometry!.location!.lat!,
+                          placeDetailsModel.geometry!.location!.lng!);
+                      getRouteData();
                       setState(() {});
-
                     },
                   )
                 ],
@@ -232,30 +259,38 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     );
   }
 
-  void updateCurrentLocation() async {
-    try {
-      var locationData = await locationService.getLocation();
-      var myCameraPosition = CameraPosition(
-        zoom: 16,
-        target: LatLng(locationData.latitude!, locationData.longitude!),
-      );
-      var myMarker = newMarker(
-        id: 'myMarker21',
-        latLng: LatLng(locationData.latitude!, locationData.longitude!),
-      );
-      myMarkers.add(myMarker);
-      setState(() {});
-      googleMapController.animateCamera(
-        CameraUpdate.newCameraPosition(myCameraPosition),
-      );
-    } on LocationServiceException catch (e) {
-      print('LocationServiceException');
-      // TODO
-    } on LocationPermissionException catch (e) {
-      // TODO
-      print('LocationPermissionException');
-    } catch (e) {}
+  Future<List<LatLng>> getRouteData() async {
+    LocationInfoModel origin = LocationInfoModel(
+      location: LocationModel(
+        latLng: LatLngModel(
+          latitude: currentLocation.latitude,
+          longitude: currentLocation.longitude,
+        ),
+      ),
+    );
+
+    LocationInfoModel destination = LocationInfoModel(
+        location: LocationModel(
+      latLng: LatLngModel(
+        latitude: destinationLocation.latitude,
+        longitude: destinationLocation.longitude,
+      ),
+    ));
+    RoutesModel routes = await routesService.fetchRoutes(
+      origin: origin,
+      destination: destination,
+    );
+    List<LatLng> routesPoints = getDecodedRoutes(routes);
+
+    return routesPoints;
+  }
+
+  List<LatLng> getDecodedRoutes(RoutesModel routes) {
+    PolylinePoints polylinePoints = PolylinePoints();
+    List<PointLatLng> result = polylinePoints
+        .decodePolyline(routes.routes!.first.polyline!.encodedPolyline!);
+    List<LatLng> routesPoints =
+        result.map((e) => LatLng(e.latitude, e.longitude)).toList();
+    return routesPoints;
   }
 }
-
-

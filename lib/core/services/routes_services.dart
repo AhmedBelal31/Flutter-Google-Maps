@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-
 import '../../data/models/location_info/location_info.dart';
 import '../../data/models/routes_model/routes_model.dart';
 import '../../data/models/routes_modifiers.dart';
