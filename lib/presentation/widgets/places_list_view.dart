@@ -24,7 +24,8 @@ class PlacesListView extends StatelessWidget {
       itemBuilder: (context, index) {
         return Container(
           decoration: BoxDecoration(
-              color: Colors.white.withOpacity(.5),
+            color: Colors.white,
+
               borderRadius: BorderRadius.circular(12.0)),
           child: ListTile(
             title: Text(places[index].description!),
@@ -32,17 +33,20 @@ class PlacesListView extends StatelessWidget {
               Icons.location_on_outlined,
             ),
             trailing: IconButton(
-              icon: const Icon(Icons.arrow_forward_ios),
+              icon: const Icon(Icons.arrow_forward_ios ,),
               onPressed: () async {
                 var placeDetails = await googleMapsPlacesServices
-                    .getPlaceDetails(placeId: places[index].placeId!);
+                    .getPlaceDetails(
+                    placeId: places[index].placeId!
+                );
                 onPlaceSelected(placeDetails);
               },
             ),
           ),
         );
       },
-      separatorBuilder: (context, index) => const SizedBox(
+      separatorBuilder: (context, index) =>
+      const SizedBox(
         height: 8,
       ),
       itemCount: places.length,
