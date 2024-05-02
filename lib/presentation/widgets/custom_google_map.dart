@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_with_google_maps/core/services/location_service.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -26,6 +27,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   Set<Marker> myMarkers = {};
   Set<Polyline> myPolyLines = {};
   late MapServices mapServices;
+  Timer? debounce;
 
   @override
   void initState() {
@@ -41,19 +43,29 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     super.initState();
   }
 
-  void fetchPredications() async {
-    sessionToken ??= uuid.v4();
-    await mapServices.fetchPredications(
-      textEditingControllerValue: textEditingController.text,
-      sessionToken: sessionToken!,
-      places: places,
+  void fetchPredications() {
+    debounce = Timer(
+      const Duration(milliseconds: 200),
+      () async {
+        if (debounce?.isActive ?? false) {
+          debounce?.cancel();
+        }
+        sessionToken ??= uuid.v4();
+        await mapServices.fetchPredications(
+          textEditingControllerValue: textEditingController.text,
+          sessionToken: sessionToken!,
+          places: places,
+        );
+      },
     );
+
     setState(() {});
   }
 
   @override
   void dispose() {
     textEditingController.dispose();
+    debounce?.cancel();
     super.dispose();
   }
 
