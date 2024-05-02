@@ -245,41 +245,44 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
               },
               markers: myMarkers,
             ),
-            Positioned(
-              top: 16,
-              right: 16,
-              left: 16,
-              child: Column(
-                children: [
-                  CustomTextField(textEditingController: textEditingController),
-                  const SizedBox(height: 20),
-                  PlacesListView(
-                    places: places,
-                    googleMapsPlacesServices: googleMapsPlacesServices,
-                    onPlaceSelected: (placeDetailsModel) async {
-                      sessionToken = null;
-                      textEditingController.clear();
-                      places.clear();
-                      FocusScope.of(context).unfocus();
-                      destinationLocation = LatLng(
-                          placeDetailsModel.geometry!.location!.lat!,
-                          placeDetailsModel.geometry!.location!.lng!);
-                      var routesPoints = await getRouteData();
-                      displayRoute(routesPoints);
-                      Marker myDestinationMarker = Marker(
-                        markerId: const MarkerId(
-                          'destinationLocation',
-                        ),
-                        position: destinationLocation,
-                      );
-                      myMarkers.add(myDestinationMarker);
+            googleMapController != null
+                ? Positioned(
+                    top: 16,
+                    right: 16,
+                    left: 16,
+                    child: Column(
+                      children: [
+                        CustomTextField(
+                            textEditingController: textEditingController),
+                        const SizedBox(height: 20),
+                        PlacesListView(
+                          places: places,
+                          googleMapsPlacesServices: googleMapsPlacesServices,
+                          onPlaceSelected: (placeDetailsModel) async {
+                            sessionToken = null;
+                            textEditingController.clear();
+                            places.clear();
+                            FocusScope.of(context).unfocus();
+                            destinationLocation = LatLng(
+                                placeDetailsModel.geometry!.location!.lat!,
+                                placeDetailsModel.geometry!.location!.lng!);
+                            var routesPoints = await getRouteData();
+                            displayRoute(routesPoints);
+                            Marker myDestinationMarker = Marker(
+                              markerId: const MarkerId(
+                                'destinationLocation',
+                              ),
+                              position: destinationLocation,
+                            );
+                            myMarkers.add(myDestinationMarker);
 
-                      setState(() {});
-                    },
+                            setState(() {});
+                          },
+                        )
+                      ],
+                    ),
                   )
-                ],
-              ),
-            ),
+                : const SizedBox(),
           ],
         ),
       ),
