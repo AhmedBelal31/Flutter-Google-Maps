@@ -218,6 +218,20 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     return SafeArea(
       child: Scaffold(
         resizeToAvoidBottomInset: false,
+        floatingActionButton: googleMapController != null
+            ? FloatingActionButton(
+                backgroundColor: Colors.white,
+                onPressed: () {
+                  setState(() {
+                    updateCurrentLocation();
+                  });
+                },
+                child: const Icon(
+                  Icons.location_on_outlined,
+                  color: Color(0xFF242F3E),
+                ),
+              )
+            : null,
         body: Stack(
           children: [
             GoogleMap(
