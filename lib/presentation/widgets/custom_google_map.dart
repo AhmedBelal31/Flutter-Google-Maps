@@ -53,7 +53,6 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
       zoom: 1,
     );
     //addMarkers();
-    // addPolyLines();
     uuid = Uuid();
     locationService = LocationService();
     textEditingController = TextEditingController();
@@ -67,8 +66,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   void fetchPredications() async {
     sessionToken ??= uuid.v4();
     if (textEditingController.text.isNotEmpty) {
-      var result = await placesService.getPredications(
-          input: textEditingController.text, sessionToken: sessionToken!);
+      var result = await placesService.getPredications(input: textEditingController.text, sessionToken: sessionToken!);
       places.clear();
       places.addAll(result);
       setState(() {});
@@ -287,102 +285,5 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     );
   }
 
-  Future<List<LatLng>> getRouteData() async {
-    LocationInfoModel origin = LocationInfoModel(
-      location: LocationModel(
-        latLng: LatLngModel(
-          latitude: currentLocation.latitude,
-          longitude: currentLocation.longitude,
-        ),
-      ),
-    );
 
-    LocationInfoModel destination = LocationInfoModel(
-        location: LocationModel(
-      latLng: LatLngModel(
-        latitude: destinationLocation.latitude,
-        longitude: destinationLocation.longitude,
-      ),
-    ));
-    RoutesModel routes = await routesService.fetchRoutes(
-      origin: origin,
-      destination: destination,
-    );
-    // duration = routes.routes!.first.duration!;
-    // distance = routes.routes!.first.distanceMeters!.toString();
-
-    List<LatLng> routesPoints = getDecodedRoutes(routes);
-
-    return routesPoints;
-  }
-
-  List<LatLng> getDecodedRoutes(RoutesModel routes) {
-    PolylinePoints polylinePoints = PolylinePoints();
-    List<PointLatLng> result = polylinePoints
-        .decodePolyline(routes.routes!.first.polyline!.encodedPolyline!);
-    List<LatLng> routesPoints =
-        result.map((e) => LatLng(e.latitude, e.longitude)).toList();
-    return routesPoints;
-  }
-
-  void displayRoute(List<LatLng> routesPoints) {
-    Polyline route = Polyline(
-      color: Colors.blue,
-      width: 5,
-      startCap: Cap.roundCap,
-      endCap: Cap.roundCap,
-      polylineId: const PolylineId('route'),
-      points: routesPoints,
-    );
-    myPolyLines.add(route);
-
-    LatLngBounds getLatLngBounds(List<LatLng> routesPoints) {
-      var southwestLatitude = routesPoints.first.latitude;
-      var southwestLongitude = routesPoints.first.longitude;
-      var northeastLatitude = routesPoints.first.latitude;
-      var northeastLongitude = routesPoints.first.longitude;
-
-      for (int i = 0; i < routesPoints.length; i++) {
-        if (routesPoints[i].latitude < southwestLatitude) {
-          southwestLatitude = routesPoints[i].latitude;
-        } else if (routesPoints[i].latitude > northeastLatitude) {
-          northeastLatitude = routesPoints[i].latitude;
-        }
-      }
-
-      for (int i = 0; i < routesPoints.length; i++) {
-        if (routesPoints[i].longitude < southwestLongitude) {
-          southwestLongitude = routesPoints[i].longitude;
-        } else if (routesPoints[i].longitude > northeastLongitude) {
-          northeastLongitude = routesPoints[i].longitude;
-        }
-      }
-      return LatLngBounds(
-        southwest: LatLng(southwestLatitude, southwestLongitude),
-        northeast: LatLng(northeastLatitude, northeastLongitude),
-      );
-    }
-
-    // LatLngBounds getLatLngBoundsByBuiltInMethod(List<LatLng> routesPoints) {
-    //   var southwestLatitude = routesPoints.first.latitude;
-    //   var southwestLongitude = routesPoints.first.longitude;
-    //   var northeastLatitude = routesPoints.first.latitude;
-    //   var northeastLongitude = routesPoints.first.longitude;
-    //
-    //   for (var point in routesPoints) {
-    //     southwestLatitude = min(southwestLatitude, point.latitude);
-    //     southwestLongitude = min(southwestLongitude, point.longitude);
-    //
-    //     northeastLatitude = max(northeastLatitude, point.latitude);
-    //     northeastLongitude = max(northeastLongitude, point.longitude);
-    //   }
-    //   return LatLngBounds(
-    //       southwest: LatLng(southwestLatitude, southwestLongitude),
-    //       northeast: LatLng(northeastLatitude, northeastLongitude));
-    // }
-
-    LatLngBounds latLngBounds = getLatLngBounds(routesPoints);
-    googleMapController
-        ?.animateCamera(CameraUpdate.newLatLngBounds(latLngBounds, 32));
-  }
 }
