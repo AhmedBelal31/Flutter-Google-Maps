@@ -22,34 +22,60 @@ class PlacesListView extends StatelessWidget {
       shrinkWrap: true,
       physics: const BouncingScrollPhysics(),
       itemBuilder: (context, index) {
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-
-              borderRadius: BorderRadius.circular(12.0)),
-          child: ListTile(
-            title: Text(places[index].description!),
-            leading: const Icon(
-              Icons.location_on_outlined,
-            ),
-            trailing: IconButton(
-              icon: const Icon(Icons.arrow_forward_ios ,),
-              onPressed: () async {
-                var placeDetails = await googleMapsPlacesServices
-                    .getPlaceDetails(
-                    placeId: places[index].placeId!
-                );
-                onPlaceSelected(placeDetails);
-              },
-            ),
-          ),
+        return PlacesListViewItem(
+          index: index,
+          places: places,
+          googleMapsPlacesServices: googleMapsPlacesServices,
+          onPlaceSelected: onPlaceSelected,
         );
       },
-      separatorBuilder: (context, index) =>
-      const SizedBox(
+      separatorBuilder: (context, index) => const SizedBox(
         height: 8,
       ),
       itemCount: places.length,
+    );
+  }
+}
+
+class PlacesListViewItem extends StatelessWidget {
+  const PlacesListViewItem(
+      {super.key,
+      required this.places,
+      required this.googleMapsPlacesServices,
+      required this.onPlaceSelected,
+      required this.index});
+
+  final int index;
+  final List<PredictionsModel> places;
+  final GoogleMapsPlacesServices googleMapsPlacesServices;
+  final Function(PlaceDetailsModel p1) onPlaceSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white.withOpacity(.7),
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: ListTile(
+        title: Text(
+          places[index].description!
+
+        ),
+        leading: const Icon(
+          Icons.location_on_outlined,
+        ),
+        trailing: IconButton(
+          icon: const Icon(
+            Icons.arrow_forward_ios,
+          ),
+          onPressed: () async {
+            var placeDetails = await googleMapsPlacesServices.getPlaceDetails(
+                placeId: places[index].placeId!);
+            onPlaceSelected(placeDetails);
+          },
+        ),
+      ),
     );
   }
 }
