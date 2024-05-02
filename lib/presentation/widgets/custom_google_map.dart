@@ -1,5 +1,3 @@
-import 'dart:convert';
-import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:flutter_with_google_maps/core/services/location_service.dart';
@@ -29,7 +27,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   late LocationService locationService;
   GoogleMapController? googleMapController;
   late TextEditingController textEditingController;
-  late GoogleMapsPlacesServices googleMapsPlacesServices;
+  late PlacesServices placesService;
   List<PredictionsModel> places = [];
   late Uuid uuid;
   String? sessionToken;
@@ -59,7 +57,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
     uuid = Uuid();
     locationService = LocationService();
     textEditingController = TextEditingController();
-    googleMapsPlacesServices = GoogleMapsPlacesServices();
+    placesService = PlacesServices();
     textEditingController.addListener(() => fetchPredications());
     routesService = RoutesService();
 
@@ -69,7 +67,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
   void fetchPredications() async {
     sessionToken ??= uuid.v4();
     if (textEditingController.text.isNotEmpty) {
-      var result = await googleMapsPlacesServices.getPredications(
+      var result = await placesService.getPredications(
           input: textEditingController.text, sessionToken: sessionToken!);
       places.clear();
       places.addAll(result);
@@ -257,7 +255,7 @@ class _CustomGoogleMapState extends State<CustomGoogleMap> {
                         const SizedBox(height: 20),
                         PlacesListView(
                           places: places,
-                          googleMapsPlacesServices: googleMapsPlacesServices,
+                          googleMapsPlacesServices: placesService,
                           onPlaceSelected: (placeDetailsModel) async {
                             sessionToken = null;
                             textEditingController.clear();

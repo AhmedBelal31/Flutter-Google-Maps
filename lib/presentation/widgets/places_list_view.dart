@@ -5,7 +5,7 @@ import '../../data/models/place_autocomplete_model.dart';
 
 class PlacesListView extends StatelessWidget {
   final List<PredictionsModel> places;
-  final GoogleMapsPlacesServices googleMapsPlacesServices;
+  final PlacesServices googleMapsPlacesServices;
   final Function(PlaceDetailsModel) onPlaceSelected;
 
   const PlacesListView({
@@ -47,7 +47,7 @@ class PlacesListViewItem extends StatelessWidget {
 
   final int index;
   final List<PredictionsModel> places;
-  final GoogleMapsPlacesServices googleMapsPlacesServices;
+  final PlacesServices googleMapsPlacesServices;
   final Function(PlaceDetailsModel p1) onPlaceSelected;
 
   @override

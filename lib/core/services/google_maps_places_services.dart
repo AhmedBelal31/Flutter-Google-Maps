@@ -4,7 +4,7 @@ import 'package:flutter_with_google_maps/data/models/place_details_model/place_d
 import 'package:http/http.dart' as http;
 import '../utils/api_key.dart';
 
-class GoogleMapsPlacesServices {
+class PlacesServices {
   Future<List<PredictionsModel>> getPredications(
       {required String input, required sessionToken}) async {
     String baseUrl = 'https://maps.googleapis.com/maps/api/place';
